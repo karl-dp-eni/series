@@ -1,0 +1,44 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<h1>Page de test</h1>
+
+{# Création de variable #}
+{% set name = "Karl" %}
+
+{# Lecture de la vatiable #}
+<h2>Bienvenue {{ name }}</h2>
+
+{# Création d'un tableau #}
+{% set colors = ['red', 'green', 'blue'] %}
+
+{% for color in colors %}
+    {% if loop.first %} {# Affiche un message uniquement si premier élément de la liste #}
+        <p>Première couleur :</p>
+    {% elseif loop.last %} {# Affiche un message uniquement si dernier élément de la liste #}
+        <p>Dernière couleur :</p>
+    {% endif %}
+    <div style="background-color: {{ color }}">{{ color }}</div>
+    <div>Index : {{ loop.index }}</div> {# Affiche l'index de l'élément (par défaut comment à 1, sinon il faut mettre loop.index0 pour commencer à 0 #}
+{% endfor %}
+
+{# Utilisation d'objet #}
+{% set serie = {
+    'name' : 'Code Quantum',
+    'year' : 1990
+} %}
+
+<div>Nom de la série : {{ serie.name }}</div>
+
+{# Quelques filtres #}
+<h2>Filtres</h2>
+<div>Prénom en majuscule : {{ name | upper }}</div>
+<div>Taille du tableau colors : {{ colors | length }}</div>
+<div>Joindre un tableau : {{ colors | join('-') }}</div>
+<div>Date du jour : {{ 'now' | date('d/m/Y') }}</div>
+
+{% endblock %}
+
+{% block title %}
+    {{ parent() }} | Test
+{% endblock %}
