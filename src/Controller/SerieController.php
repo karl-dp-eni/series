@@ -7,6 +7,8 @@ use App\Form\SerieType;
 use App\Repository\SerieRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -57,8 +59,11 @@ final class SerieController extends AbstractController
 
     #[Route('/create', name: 'create', methods: ['GET', 'POST'])]
     public function create(
-        Request $request, // Bien utiliser le httpFoundation
-        EntityManagerInterface $entityManager): Response
+        Request                                    $request, // Bien utiliser le httpFoundation
+        EntityManagerInterface                     $entityManager,
+        #[Autowire('%serie_poster_dir%')] string   $posterDir,
+        #[Autowire('%serie_backdrop_dir%')] string $backdropDir,
+    ): Response
     {
 
         $serie = new Serie();
@@ -66,11 +71,29 @@ final class SerieController extends AbstractController
 
         $serieForm->handleRequest($request);
 
-        if ($serieForm->isSubmitted()) {
+        if ($serieForm->isSubmitted() && $serieForm->isValid()) {
+
+            // Récupération des images et traitement
+            $filePoster = $serieForm->get('poster')->getData();
+            $fileBackdrop = $serieForm->get('backdrop')->getData();
+
+            /**
+             * @var UploadedFile $filePoster
+             * @var UploadedFile $fileBackdrop
+             * Permet d'obtenir l'autocompletion des méthodes de UploadedFile
+             */
+            $newFileNamePoster = $serie->getName() . "-" . uniqid() . "." . $filePoster->guessExtension();
+            $newFileNameBackdrop = $serie->getName() . "-backdrop-" . uniqid() . "." . $fileBackdrop->guessExtension();
+            $filePoster->move($posterDir, $newFileNamePoster);
+            $fileBackdrop->move($backdropDir, $newFileNameBackdrop);
+            $serie->setPoster($newFileNamePoster);
+            $serie->setBackdrop($newFileNameBackdrop);
+
             $serie->setDateCreated(new \DateTime());
             $entityManager->persist($serie);
             $entityManager->flush();
-            $this->addFlash('success', $serie->getName() . 'created !');
+            $this->addFlash('success', $serie->getName() . ' created!');
+            return $this->redirectToRoute('serie_detail', ['id' => $serie->getId()]);
         }
 
         return $this->render('serie/create.html.twig', [
@@ -95,17 +118,37 @@ final class SerieController extends AbstractController
     }
 
     #[Route('/{id}/update', name: 'update', methods: ['GET', 'POST'])]
-    public function update(int                    $id,
-                           SerieRepository        $serieRepository,
-                           Request                $request,
-                           EntityManagerInterface $entityManager): Response
+    public function update(int                                        $id,
+                           SerieRepository                            $serieRepository,
+                           Request                                    $request,
+                           EntityManagerInterface                     $entityManager,
+                           #[Autowire('%serie_poster_dir%')] string   $posterDir,
+                           #[Autowire('%serie_backdrop_dir%')] string $backdropDir,
+    ): Response
     {
         $serie = $serieRepository->find($id);
         $serieForm = $this->createForm(SerieType::class, $serie);
 
         $serieForm->handleRequest($request);
 
-        if ($serieForm->isSubmitted()) {
+        if ($serieForm->isSubmitted() && $serieForm->isValid()) {
+
+            // Récupération de l'image et traitement
+            $filePoster = $serieForm->get('poster')->getData();
+            $fileBackdrop = $serieForm->get('backdrop')->getData();
+
+            /**
+             * @var UploadedFile $filePoster
+             * @var UploadedFile $fileBackdrop
+             * Permet d'obtenir l'autocompletion des méthodes de UploadedFile
+             */
+            $newFileNamePoster = $serie->getName() . "-" . uniqid() . "." . $filePoster->guessExtension();
+            $newFileNameBackdrop = $serie->getName() . "-backdrop-" . uniqid() . "." . $fileBackdrop->guessExtension();
+            $filePoster->move($posterDir, $newFileNamePoster);
+            $fileBackdrop->move($backdropDir, $newFileNameBackdrop);
+            $serie->setPoster($newFileNamePoster);
+            $serie->setBackdrop($newFileNameBackdrop);
+
             $entityManager->persist($serie);
             $entityManager->flush();
             $this->addFlash('success', $serie->getName() . ' updated !');

@@ -44,12 +44,19 @@ class SerieRepository extends ServiceEntityRepository
 
     public function findBestSeriesWithPagination(int $page) : array {
 
-//        $qb = $this->createQueryBuilder('s');
-//        $qb->addOrderBy('s.popularity', 'DESC');
         $limit = 50;
         $offset = ($page -1) * $limit;
 
-        return $this->findBy([], ['popularity' => 'DESC'],$limit, $offset);
+        $qb = $this->createQueryBuilder('s');
+        $qb
+            ->join('s.seasons', 'se')
+            ->addSelect('se')
+            ->addOrderBy('s.popularity', 'DESC')
+            ->setMaxResults($limit)
+            ->setFirstResult($offset);
+
+//        return $this->findBy([], ['popularity' => 'DESC'],$limit, $offset);
+        return $qb->getQuery()->getResult();
 
     }
 }

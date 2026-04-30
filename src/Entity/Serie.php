@@ -3,8 +3,11 @@
 namespace App\Entity;
 
 use App\Repository\SerieRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: SerieRepository::class)]
 class Serie
@@ -14,15 +17,19 @@ class Serie
     #[ORM\Column]
     private ?int $id = null;
 
+    #[Assert\NotBlank(message: 'The name is required!')]
+    #[Assert\Length(min: 2, max: 255, minMessage: 'Min {{ min }} characters!', maxMessage: 'Max {{ max }} characters!')]
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $overview = null;
 
+    #[Assert\Choice(choices: ['ended', 'canceled', 'returning'], message: 'Value not OK!')]
     #[ORM\Column(length: 50)]
     private ?string $status = null;
 
+    #[Assert\Range(notInRangeMessage: 'Vote must be between {{ min }} and {{ max }}', min: 0, max: 10)]
     #[ORM\Column(type: Types::DECIMAL, precision: 3, scale: 1)]
     private ?string $vote = null;
 
@@ -32,9 +39,11 @@ class Serie
     #[ORM\Column(length: 255)]
     private ?string $genres = null;
 
+    #[Assert\LessThan(propertyPath: 'lastAirDate', message: 'Start date expected!')]
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTime $firstAirDate = null;
 
+    #[Assert\GreaterThan(propertyPath: 'firstAirDate')]
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTime $lastAirDate = null;
 
@@ -44,6 +53,7 @@ class Serie
     #[ORM\Column(length: 255)]
     private ?string $poster = null;
 
+    #[Assert\Type(type: 'integer', message: 'The value {{ value }} in not a valid {{ type }}')]
     #[ORM\Column]
     private ?int $tmdbId = null;
 
@@ -52,6 +62,17 @@ class Serie
 
     #[ORM\Column(nullable: true)]
     private ?\DateTime $dateModified = null;
+
+    /**
+     * @var Collection<int, Season>
+     */
+    #[ORM\OneToMany(targetEntity: Season::class, mappedBy: 'serie', orphanRemoval: true)]
+    private Collection $seasons;
+
+    public function __construct()
+    {
+        $this->seasons = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -135,7 +156,7 @@ class Serie
         return $this->firstAirDate;
     }
 
-    public function setFirstAirDate(\DateTime $firstAirDate): static
+    public function setFirstAirDate(?\DateTime $firstAirDate): static
     {
         $this->firstAirDate = $firstAirDate;
 
@@ -147,7 +168,7 @@ class Serie
         return $this->lastAirDate;
     }
 
-    public function setLastAirDate(\DateTime $lastAirDate): static
+    public function setLastAirDate(?\DateTime $lastAirDate): static
     {
         $this->lastAirDate = $lastAirDate;
 
@@ -210,6 +231,36 @@ class Serie
     public function setDateModified(?\DateTime $dateModified): static
     {
         $this->dateModified = $dateModified;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Season>
+     */
+    public function getSeasons(): Collection
+    {
+        return $this->seasons;
+    }
+
+    public function addSeason(Season $season): static
+    {
+        if (!$this->seasons->contains($season)) {
+            $this->seasons->add($season);
+            $season->setSerie($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSeason(Season $season): static
+    {
+        if ($this->seasons->removeElement($season)) {
+            // set the owning side to null (unless already changed)
+            if ($season->getSerie() === $this) {
+                $season->setSerie(null);
+            }
+        }
 
         return $this;
     }

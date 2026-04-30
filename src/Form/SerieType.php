@@ -6,10 +6,12 @@ use App\Entity\Serie;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\Image;
 
 class SerieType extends AbstractType
 {
@@ -40,8 +42,25 @@ class SerieType extends AbstractType
             ])
             ->add('firstAirDate', DateType::class)
             ->add('lastAirDate')
-            ->add('backdrop')
-            ->add('poster')
+            ->add('backdrop', FileType::class, [
+                'mapped' => false,
+                'constraints' => [
+                    new Image(
+                        maxSize: '5M',
+                        mimeTypes: ['image/jpeg', 'image/png'],
+                        maxSizeMessage: '5Mo max!',
+                    )
+                ]
+            ])
+            ->add('poster', FileType::class, [
+                'mapped' => false, // à la soumission, le champ restera null, il ne sera pas traité automatiquement
+                'constraints' => [
+                    new Image(
+                        maxSize: '5M',
+                        mimeTypes: ['image/jpeg', 'image/png'],
+                        maxSizeMessage: '5Mo max!'), // Validator Constraint
+                ]
+            ])
             ->add('tmdbId')
         ;
     }

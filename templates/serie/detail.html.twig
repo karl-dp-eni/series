@@ -28,5 +28,24 @@
             <div>{{ serie.overview |nl2br }}</div>
         </div>
     </section>
+
+    {% if serie.seasons | length > 0 %}
+    <section>
+        <div class="seasons">
+            <h3>Seasons!</h3>
+            {% for season in serie.seasons %}
+                <article>
+                    <img src="{{ asset('img/posters/seasons/' ~ season.poster) }}"
+                         alt="{{ serie.name }} #{{ season.number }}">
+                    <div>
+                        <h4>#{{ season.number }}</h4>
+                        <div>{{ season.firstAirDate | date('d/m/Y') }}</div>
+                        <div>{{ season.overview | nl2br }}</div>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
 {% endblock %}
 
