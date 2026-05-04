@@ -82,8 +82,8 @@ final class SerieController extends AbstractController
              * @var UploadedFile $fileBackdrop
              * Permet d'obtenir l'autocompletion des méthodes de UploadedFile
              */
-            $newFileNamePoster = $serie->getName() . "-" . uniqid() . "." . $filePoster->guessExtension();
-            $newFileNameBackdrop = $serie->getName() . "-backdrop-" . uniqid() . "." . $fileBackdrop->guessExtension();
+            $newFileNamePoster = $serie->getName() . "-poster." . $filePoster->guessExtension();
+            $newFileNameBackdrop = $serie->getName() . "-backdrop." . $fileBackdrop->guessExtension();
             $filePoster->move($posterDir, $newFileNamePoster);
             $fileBackdrop->move($backdropDir, $newFileNameBackdrop);
             $serie->setPoster($newFileNamePoster);
@@ -142,8 +142,8 @@ final class SerieController extends AbstractController
              * @var UploadedFile $fileBackdrop
              * Permet d'obtenir l'autocompletion des méthodes de UploadedFile
              */
-            $newFileNamePoster = $serie->getName() . "-" . uniqid() . "." . $filePoster->guessExtension();
-            $newFileNameBackdrop = $serie->getName() . "-backdrop-" . uniqid() . "." . $fileBackdrop->guessExtension();
+            $newFileNamePoster = $serie->getName() . "-poster." . $filePoster->guessExtension();
+            $newFileNameBackdrop = $serie->getName() . "-backdrop." . $fileBackdrop->guessExtension();
             $filePoster->move($posterDir, $newFileNamePoster);
             $fileBackdrop->move($backdropDir, $newFileNameBackdrop);
             $serie->setPoster($newFileNamePoster);

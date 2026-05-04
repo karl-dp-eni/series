@@ -9,6 +9,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
+#[ORM\HasLifecycleCallbacks]
 #[ORM\Entity(repositoryClass: SerieRepository::class)]
 class Serie
 {
@@ -66,7 +67,7 @@ class Serie
     /**
      * @var Collection<int, Season>
      */
-    #[ORM\OneToMany(targetEntity: Season::class, mappedBy: 'serie', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: Season::class, mappedBy: 'serie', cascade: ['remove'])]
     private Collection $seasons;
 
     public function __construct()
@@ -263,5 +264,17 @@ class Serie
         }
 
         return $this;
+    }
+
+    #[ORM\PrePersist]
+    public function insertCallback(): void
+    {
+        $this->setDateCreated(new \DateTime());
+    }
+
+    #[ORM\PreUpdate]
+    public function updateCallback(): void
+    {
+        $this->setDateModified(new \DateTime());
     }
 }
