@@ -10,12 +10,14 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/season', name: 'season_')]
 final class SeasonController extends AbstractController
 {
     #[Route('/create', name: 'create')]
     #[Route('/{id}/create', name: 'create_with_serie')]
+    #[IsGranted("ROLE_ADMIN")]
     public function create(
         EntityManagerInterface $entityManager,
         Request                $request,
