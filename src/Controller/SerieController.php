@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Serie;
 use App\Form\SerieType;
 use App\Repository\SerieRepository;
+use App\Utils\FileUploader;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -61,6 +62,7 @@ final class SerieController extends AbstractController
     public function create(
         Request                                    $request, // Bien utiliser le httpFoundation
         EntityManagerInterface                     $entityManager,
+        FileUploader                               $fileUploader,
         #[Autowire('%serie_poster_dir%')] string   $posterDir,
         #[Autowire('%serie_backdrop_dir%')] string $backdropDir,
     ): Response
@@ -76,20 +78,11 @@ final class SerieController extends AbstractController
             // Récupération des images et traitement
             $filePoster = $serieForm->get('poster')->getData();
             $fileBackdrop = $serieForm->get('backdrop')->getData();
+            $serie
+                ->setPoster($fileUploader->upload($filePoster, $posterDir, $serie->getName()))
+                ->setBackdrop($fileUploader->upload($fileBackdrop, $backdropDir, $serie->getName()))
+                ->setDateCreated(new \DateTime());
 
-            /**
-             * @var UploadedFile $filePoster
-             * @var UploadedFile $fileBackdrop
-             * Permet d'obtenir l'autocompletion des méthodes de UploadedFile
-             */
-            $newFileNamePoster = $serie->getName() . "-poster." . $filePoster->guessExtension();
-            $newFileNameBackdrop = $serie->getName() . "-backdrop." . $fileBackdrop->guessExtension();
-            $filePoster->move($posterDir, $newFileNamePoster);
-            $fileBackdrop->move($backdropDir, $newFileNameBackdrop);
-            $serie->setPoster($newFileNamePoster);
-            $serie->setBackdrop($newFileNameBackdrop);
-
-            $serie->setDateCreated(new \DateTime());
             $entityManager->persist($serie);
             $entityManager->flush();
             $this->addFlash('success', $serie->getName() . ' created!');
@@ -122,6 +115,7 @@ final class SerieController extends AbstractController
                            SerieRepository                            $serieRepository,
                            Request                                    $request,
                            EntityManagerInterface                     $entityManager,
+                           FileUploader                               $fileUploader,
                            #[Autowire('%serie_poster_dir%')] string   $posterDir,
                            #[Autowire('%serie_backdrop_dir%')] string $backdropDir,
     ): Response
@@ -136,18 +130,12 @@ final class SerieController extends AbstractController
             // Récupération de l'image et traitement
             $filePoster = $serieForm->get('poster')->getData();
             $fileBackdrop = $serieForm->get('backdrop')->getData();
-
-            /**
-             * @var UploadedFile $filePoster
-             * @var UploadedFile $fileBackdrop
-             * Permet d'obtenir l'autocompletion des méthodes de UploadedFile
-             */
-            $newFileNamePoster = $serie->getName() . "-poster." . $filePoster->guessExtension();
-            $newFileNameBackdrop = $serie->getName() . "-backdrop." . $fileBackdrop->guessExtension();
-            $filePoster->move($posterDir, $newFileNamePoster);
-            $fileBackdrop->move($backdropDir, $newFileNameBackdrop);
-            $serie->setPoster($newFileNamePoster);
-            $serie->setBackdrop($newFileNameBackdrop);
+            $serie
+                ->setPoster(
+                    $fileUploader->update($serie->getPoster(), $posterDir, $filePoster, $serie->getName()))
+                ->setBackdrop(
+                    $fileUploader->update($serie->getBackdrop(), $backdropDir, $fileBackdrop, $serie->getName()))
+                ->setDateModified(new \DateTime());
 
             $entityManager->persist($serie);
             $entityManager->flush();
