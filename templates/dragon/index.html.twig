@@ -1,0 +1,12 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello DragonController!{% endblock %}
+
+{% block body %}
+    {% for character in characters.items %}
+        <article>
+            <p>{{ character.name }}</p>
+            <img src="{{ character.image }}" alt="{{ character.name }}" width="200px">
+        </article>
+    {% endfor %}
+{% endblock %}

@@ -1,0 +1,7 @@
+### GET ALL CHARACTERS
+GET https://dragonball-api.com/api/characters
+###
+
+### GET ONE CHARACTER
+GET https://dragonball-api.com/api/characters/1
+###

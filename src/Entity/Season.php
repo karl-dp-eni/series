@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\SeasonRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\HasLifecycleCallbacks]
 #[ORM\Entity(repositoryClass: SeasonRepository::class)]
@@ -16,12 +17,14 @@ class Season
     private ?int $id = null;
 
     #[ORM\Column]
+    #[Groups(['serie-read'])]
     private ?int $number = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTime $firstAirDate = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['serie-read'])]
     private ?string $overview = null;
 
     #[ORM\Column(length: 255, nullable: true)]

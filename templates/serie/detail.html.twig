@@ -9,6 +9,28 @@
     </style>
 {% endblock %}
 
+{% block extraJS %}
+    <script>
+        let buttons = Array.from(document.querySelectorAll('.btn-like'));
+        // Array.from() permet de caster le suerySelectorAll qui renvoi une Node List en tableau, plus simple à utiliser
+        buttons.forEach(function(button) {
+
+            button.addEventListener('click', async function () {
+
+                const response = await fetch(
+                    '{{ path('api_serie_update_like', {'id': serie.id}) }}',
+                    {method: 'PATCH', body: JSON.stringify({'like': button.value})}
+                )
+                if (response.ok) {
+                    let data = await response.json();
+                    document.getElementById('nbLike').innerHTML = data.nbLike;
+                }
+
+            });
+        })
+    </script>
+{% endblock %}
+
 {% block body %}
     <section class="serie-details">
         <div>
@@ -21,6 +43,10 @@
                    onclick="return confirm('Delete {{ serie.name }} ?')">Delete</a>
                 <a class="link_button" href="{{ path('serie_update', {'id': serie.id}) }}">Update</a>
                 <a class="link_button" href="{{ path('season_create_with_serie', {'id': serie.id}) }}">Add new season</a>
+            </div>
+            <div>Likes : <span id="nbLike">{{ serie.nbLike }}</span>
+                <button class="btn-like" value="1">👍</button>
+                <button class="btn-like" value="-1">👎</button>
             </div>
             <div>User ratings : {{ serie.vote }}</div>
             <div>Categorized in : {{ serie.genres }}</div>

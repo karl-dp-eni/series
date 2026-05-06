@@ -1,0 +1,20 @@
+### DELETE ONE SERIE
+DELETE http://localhost/series/public/api/serie/55
+###
+
+### CREATE A SERIE
+POST http://localhost/series/public/api/serie
+Content-Type: application/json
+
+{
+    "name": "Le monde de Jamy",
+    "status": "ended",
+    "vote": "8",
+    "popularity": "500",
+    "genres": "SF",
+    "firstAirDate": "2026-02-01",
+    "lastAirDate": "2026-03-01",
+    "backdrop": "dfgdfg.png",
+    "poster": "dfgdg.png",
+    "tmdbId": 123456
+}
