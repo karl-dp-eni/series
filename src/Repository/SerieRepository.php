@@ -17,7 +17,8 @@ class SerieRepository extends ServiceEntityRepository
         parent::__construct($registry, Serie::class);
     }
 
-    public function findBestSeries() {
+    public function findBestSeries()
+    {
 
         // Les séries les plus populaires, triées par popularity
         // en DQL
@@ -43,19 +44,32 @@ class SerieRepository extends ServiceEntityRepository
         return $query->getResult();
     }
 
-    public function findBestSeriesWithPagination(int $page) : Paginator
+    public function findBestSeriesWithPagination(int $page): Paginator
     {
 
+        // Version queryBuilder
         $limit = 50;
-        $offset = ($page -1) * $limit;
+        $offset = ($page - 1) * $limit;
 
         $qb = $this->createQueryBuilder('s');
         $qb
-            ->join('s.seasons', 'se')
+            ->Leftjoin('s.seasons', 'se')
             ->addSelect('se')
             ->addOrderBy('s.popularity', 'DESC')
             ->setMaxResults($limit)
             ->setFirstResult($offset);
+
+        // Version DQL
+//        $dql = "SELECT s, se FROM App\Entity\Serie AS s
+//                  // bien ajouter se dans le SELECT pour s'assurer d'avoir l'entièreté des données
+//                LEFT JOIN s.seasons AS se
+//                ORDER BY s.popularity DESC
+//                ";
+//
+//        $query = $this->getEntityManager()->createQuery($dql);
+//        $query
+//            ->setMaxResults($limit)
+//            ->setFirstResult($offset);
 
 //        return $this->findBy([], ['popularity' => 'DESC'],$limit, $offset);
 //        return $qb->getQuery()->getResult();
